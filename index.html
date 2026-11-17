@@ -6,26 +6,37 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Some game idk</title>
     <link rel="icon" href="icons8-folder-32.png" type="image/x-icon">
-  </head>
-  <body>
-        <!-- Load A-Frame from CDN -->
     <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    
+    <!-- Click component -->
+    <script>
+      AFRAME.registerComponent('click-listener', {
+        init: function () {
+          this.el.addEventListener('click', () => {
+            // Change to a random color on click
+            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            this.el.setAttribute('color', randomColor);
+          });
+        }
+      });
+    </script>
   </head>
   <body>
-    <a-scene>
-      <!-- Background / Sky -->
+    <!-- cursor="rayOrigin: mouse" lets you click with your normal mouse cursor -->
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: .clickable">
+      
       <a-sky color="#ECECEC"></a-sky>
 
-      <!-- 3D Primitive Shapes -->
-      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+      <!-- 3D Primitive Shapes (added class="clickable" and click-listener) -->
+      <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener></a-box>
+      <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener></a-sphere>
+      <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener></a-cylinder>
       
-      <!-- Ground Plane -->
       <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
 
-      <!-- Camera -->
-      
+      <!-- Using <a-camera> keeps look-controls and WASD working automatically -->
+      <a-camera position="0 1.6 0"></a-camera>
+
     </a-scene>
   </body>
 </html>
