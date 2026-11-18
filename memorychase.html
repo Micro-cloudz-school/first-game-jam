@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fixed 5x5 Hex Grid</title>
+  <title>Memory Bot Grid</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,12 +13,33 @@
 
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       background-color: #121212;
       font-family: 'Courier New', Courier, monospace;
       padding: 20px;
+      color: #cdd6f4;
+    }
+
+    .hud {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    #status {
+      color: #a6e3a1;
+    }
+
+    #score-display {
+      color: #fab387;
+      font-size: 12px;
     }
 
     /* 5x5 Grid Container */
@@ -27,28 +48,51 @@
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 12px;
       width: 100%;
-      max-width: 750px;
+      max-width: 500px;
     }
 
     /* Individual Grid Cells */
-    .hex-grid > div {
+    .cell {
       container-type: inline-size;
-      min-width: 0; /* Prevents cell blowout and fixes cqw sizing */
+      min-width: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      aspect-ratio: 2 / 1;
+      aspect-ratio: 1 / 1;
       background-color: #1e1e2e;
       color: #a6e3a1;
       border: 1px solid #313244;
       border-radius: 6px;
       font-weight: bold;
       overflow: hidden;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, opacity 0.8s ease;
     }
 
-    /* Inner wrapper ensures cqw always measures the cell, not itself */
-    .hex-grid > div > div {
-      font-size: clamp(12px, 22cqw, 32px);
+    .cell:hover {
+      border-color: #f38ba8;
+    }
+
+    .cell.blocked {
+      background-color: #313244;
+      color: #585b70;
+      cursor: not-allowed;
+      border-color: #181825;
+    }
+
+    .cell.bot {
+      background-color: #fab387;
+      color: #11111b;
+      border-color: #fab387;
+    }
+
+    .cell.bot.cornered {
+      opacity: 0.15;
+      background-color: #cc0000;
+    }
+
+    .cell > div {
+      font-size: clamp(10px, 22cqw, 20px);
       line-height: 1;
       white-space: nowrap;
     }
@@ -56,33 +100,149 @@
 </head>
 <body>
 
-  <div class="hex-grid">
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x00</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x01</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x02</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x03</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x04</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x05</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x06</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x07</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x08</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x09</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0A</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0B</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0C</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0D</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0E</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0F</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x10</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x11</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x12</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x13</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x14</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x15</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x16</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x17</div></div>
-    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x18</div></div>
+  <div class="hud">
+    <div id="status">INITIALIZING...</div>
+    <div id="score-display">CLICKS: 0 | BEST: 0</div>
   </div>
+  
+  <div class="hex-grid" id="grid"></div>
 
+  <script>
+    const GRID_SIZE = 5;
+    const totalCells = GRID_SIZE * GRID_SIZE;
+    const gridEl = document.getElementById('grid');
+    const statusEl = document.getElementById('status');
+    const scoreDisplayEl = document.getElementById('score-display');
+
+    const aiNames = [
+      "V8REG_OS1608", "V8BIGINT392B", "c03220", "38148c", "NOTPHASEONE10841", 
+      "JAN183411", "DUPB", "RAT", "3-235B-A22B", "R1-0528", 
+      "30B-A3B-ITR-2507-gguf-q2ks-mixed-A65", "10.1-47.el7_9.3", 
+      "systemd-resolved_255.4-1", "UNSTABLE21SILVER-MAGIKARP", "compute$$", 
+      "s10pB0T", "DETERMINANT87623", "allnew2027", "big26", "deepABY55", 
+      "e2.71828", "yisxw+b", "thatsMYr4M!", "nono"
+    ];
+
+    let blockedCells = new Set();
+    let botIndex = 12; 
+    let mousePos = { x: 2, y: 2 }; 
+    let score = 0;
+    let isCornered = false;
+
+    // Load best score from localStorage
+    let bestScore = parseInt(localStorage.getItem('memoryBotBestScore')) || 0;
+
+    // Pick a random AI name for this session
+    const currentAIName = aiNames[Math.floor(Math.random() * aiNames.length)];
+
+    // Initialize Grid HTML Elements
+    for (let i = 0; i < totalCells; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.index = i;
+      
+      const inner = document.createElement('div');
+      inner.textContent = '0x' + i.toString(16).padStart(2, '0').toUpperCase();
+      
+      cell.appendChild(inner);
+      cell.addEventListener('click', () => handleCellClick(i));
+      gridEl.appendChild(cell);
+    }
+
+    const cells = gridEl.querySelectorAll('.cell');
+
+    // Track mouse movement across the grid
+    gridEl.addEventListener('mousemove', (e) => {
+      const rect = gridEl.getBoundingClientRect();
+      const x = Math.floor(((e.clientX - rect.left) / rect.width) * GRID_SIZE);
+      const y = Math.floor(((e.clientY - rect.top) / rect.height) * GRID_SIZE);
+      mousePos = { x: Math.max(0, Math.min(GRID_SIZE - 1, x)), y: Math.max(0, Math.min(GRID_SIZE - 1, y)) };
+    });
+
+    function handleCellClick(index) {
+      if (index === botIndex || blockedCells.has(index) || isCornered) return;
+      
+      blockedCells.add(index);
+      score++;
+      updateScoreDisplay();
+      updateDisplay();
+    }
+
+    // Bot movement logic running every 800ms
+    setInterval(() => {
+      if (!isCornered) {
+        moveBot();
+      }
+    }, 800);
+
+    function moveBot() {
+      const row = Math.floor(botIndex / GRID_SIZE);
+      const col = botIndex % GRID_SIZE;
+
+      const directions = [
+        { r: -1, c: 0 }, // Up
+        { r: 1, c: 0 },  // Down
+        { r: 0, c: -1 }, // Left
+        { r: 0, c: 1 }   // Right
+      ];
+
+      let validMoves = [];
+
+      for (let d of directions) {
+        const newRow = row + d.r;
+        const newCol = col + d.c;
+
+        if (newRow >= 0 && newRow < GRID_SIZE && newCol >= 0 && newCol < GRID_SIZE) {
+          const newIndex = newRow * GRID_SIZE + newCol;
+          if (!blockedCells.has(newIndex)) {
+            const dist = Math.abs(newCol - mousePos.x) + Math.abs(newRow - mousePos.y);
+            validMoves.push({ index: newIndex, dist: dist });
+          }
+        }
+      }
+
+      if (validMoves.length > 0) {
+        validMoves.sort((a, b) => b.dist - a.dist);
+        botIndex = validMoves[0].index;
+        statusEl.textContent = `${currentAIName} // RUNNING`;
+      } else {
+        isCornered = true;
+        statusEl.textContent = `${currentAIName} // OFFLINE - TASK COMPLETE`;
+        
+        // Save best score if current score is lowered
+        if (score < bestScore) {
+          bestScore = score;
+          localStorage.setItem('memoryBotBestScore', bestScore);
+        }
+        updateScoreDisplay();
+      }
+
+      updateDisplay();
+    }
+
+    function updateScoreDisplay() {
+      scoreDisplayEl.textContent = `CLICKS: ${score} | BEST: ${bestScore}`;
+    }
+
+    function updateDisplay() {
+      cells.forEach((cell, i) => {
+        cell.classList.remove('blocked', 'bot', 'cornered');
+        if (blockedCells.has(i)) {
+          cell.classList.add('blocked');
+        }
+        if (i === botIndex) {
+          cell.classList.add('bot');
+          if (isCornered) {
+            cell.classList.add('cornered');
+          }
+        }
+      });
+    }
+
+    // Initial render call
+    updateScoreDisplay();
+    statusEl.textContent = `${currentAIName} // RUNNING`;
+    updateDisplay();
+  </script>
 </body>
 </html>
