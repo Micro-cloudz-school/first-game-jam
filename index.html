@@ -7,35 +7,98 @@
     <title>Some game idk</title>
     <link rel="icon" href="icons8-folder-32.png" type="image/x-icon">
     <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+
+    <style>
+      #normal-popup {
+        width: 90vw;
+        height: 85vh;
+        max-width: 1200px;
+        padding: 0;
+        border: 2px solid #222;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #000;
+        z-index: 9999;
+      }
+
+      #normal-popup::backdrop {
+        background: rgba(0, 0, 0, 0.75);
+      }
+
+      #normal-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+
+      #close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 10;
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #close-btn:hover {
+        background: #cc0000;
+      }
+    </style>
     
-    <!-- Click component -->
     <script>
+      function openGame(url) {
+        const popup = document.getElementById('normal-popup');
+        const frame = document.getElementById('normal-frame');
+        frame.src = url;
+        popup.showModal();
+      }
+
+      function closeGame() {
+        const popup = document.getElementById('normal-popup');
+        const frame = document.getElementById('normal-frame');
+        popup.close();
+        frame.src = "";
+      }
+
       AFRAME.registerComponent('click-listener', {
+        schema: {
+          url: { type: 'string', default: '' }
+        },
         init: function () {
           this.el.addEventListener('click', () => {
-            // Change to a random color on click
             const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
             this.el.setAttribute('color', randomColor);
+
+            if (this.data.url) {
+              openGame(this.data.url);
+            }
           });
         }
       });
     </script>
   </head>
   <body>
-    <!-- cursor="rayOrigin: mouse" lets you click with your normal mouse cursor -->
+    <dialog id="normal-popup" onclose="closeGame()">
+      <button id="close-btn" onclick="closeGame()">X</button>
+      <iframe id="normal-frame" src="" allow="autoplay; fullscreen"></iframe>
+    </dialog>
+
     <a-scene cursor="rayOrigin: mouse" raycaster="objects: .clickable">
-      
       <a-sky color="#ECECEC"></a-sky>
 
-      <!-- 3D Primitive Shapes (added class="clickable" and click-listener) -->
-      <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener></a-box>
-      <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener></a-sphere>
-      <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener></a-cylinder>
+      <!-- Assign different game URLs or local files per 3D object -->
+      <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener="url: game1.html"></a-box>
+      <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener="url: game2.html"></a-sphere>
+      <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener="url: https://example.com"></a-cylinder>
       
       <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-      
       <a-camera position="0 1.6 0" wasd-controls-enabled="false"></a-camera>
-
     </a-scene>
   </body>
 </html>
