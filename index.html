@@ -71,10 +71,6 @@
           url: { type: 'string', default: '' }
         },
         init: function () {
-          this.el.addEventListener('click', () => {
-            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-            this.el.setAttribute('color', randomColor);
-
             if (this.data.url) {
               openGame(this.data.url);
             }
@@ -93,9 +89,9 @@
       <a-sky color="#ECECEC"></a-sky>
 
       <!-- Assign different game URLs or local files per 3D object -->
-      <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener="url: game1.html"></a-box>
-      <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener="url: game2.html"></a-sphere>
-      <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener="url: https://example.com"></a-cylinder>
+      <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener="url: memorychase.html"></a-box>
+      <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener="url: memorychase.html"></a-sphere>
+      <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener="url: memorychase.html"></a-cylinder>
       
       <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
       <a-camera position="0 1.6 0" wasd-controls-enabled="false"></a-camera>
