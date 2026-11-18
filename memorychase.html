@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fixed 5x5 Hex Grid</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #121212;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+    }
+
+    /* 5x5 Grid Container */
+    .hex-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 750px;
+    }
+
+    /* Individual Grid Cells */
+    .hex-grid > div {
+      container-type: inline-size;
+      min-width: 0; /* Prevents cell blowout and fixes cqw sizing */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 2 / 1;
+      background-color: #1e1e2e;
+      color: #a6e3a1;
+      border: 1px solid #313244;
+      border-radius: 6px;
+      font-weight: bold;
+      overflow: hidden;
+    }
+
+    /* Inner wrapper ensures cqw always measures the cell, not itself */
+    .hex-grid > div > div {
+      font-size: clamp(12px, 22cqw, 32px);
+      line-height: 1;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hex-grid">
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x00</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x01</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x02</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x03</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x04</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x05</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x06</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x07</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x08</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x09</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0A</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0B</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0C</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0D</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0E</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x0F</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x10</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x11</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x12</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x13</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x14</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x15</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x16</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x17</div></div>
+    <div onclick="this.style.backgroundColor = '#cc0000'"><div>0x18</div></div>
+  </div>
+
+</body>
+</html>
