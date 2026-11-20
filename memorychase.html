@@ -66,6 +66,7 @@
       font-weight: bold;
       overflow: hidden;
       cursor: pointer;
+      user-select: none;
       transition: background-color 0.2s, border-color 0.2s, opacity 0.8s ease;
     }
 
@@ -102,7 +103,7 @@
 
   <div class="hud">
     <div id="status">INITIALIZING...</div>
-    <div id="score-display">CLICKS: 0 | BEST: 0</div>
+    <div id="score-display">CLICKS: 0 | BEST: --</div>
   </div>
   
   <div class="hex-grid" id="grid"></div>
@@ -130,8 +131,8 @@
     let score = 0;
     let isCornered = false;
 
-    // Load best score from localStorage
-    let bestScore = parseInt(localStorage.getItem('memoryBotBestScore')) || 0;
+    // Load best score from localStorage (0 means no record yet)
+    let bestScore = parseInt(localStorage.getItem('memoryBotBestScore'), 10) || 0;
 
     // Pick a random AI name for this session
     const currentAIName = aiNames[Math.floor(Math.random() * aiNames.length)];
@@ -157,26 +158,13 @@
       const rect = gridEl.getBoundingClientRect();
       const x = Math.floor(((e.clientX - rect.left) / rect.width) * GRID_SIZE);
       const y = Math.floor(((e.clientY - rect.top) / rect.height) * GRID_SIZE);
-      mousePos = { x: Math.max(0, Math.min(GRID_SIZE - 1, x)), y: Math.max(0, Math.min(GRID_SIZE - 1, y)) };
+      mousePos = {
+        x: Math.max(0, Math.min(GRID_SIZE - 1, x)),
+        y: Math.max(0, Math.min(GRID_SIZE - 1, y))
+      };
     });
 
-    function handleCellClick(index) {
-      if (index === botIndex || blockedCells.has(index) || isCornered) return;
-      
-      blockedCells.add(index);
-      score++;
-      updateScoreDisplay();
-      updateDisplay();
-    }
-
-    // Bot movement logic running every 800ms
-    setInterval(() => {
-      if (!isCornered) {
-        moveBot();
-      }
-    }, 800);
-
-    function moveBot() {
+    function getValidMoves() {
       const row = Math.floor(botIndex / GRID_SIZE);
       const col = botIndex % GRID_SIZE;
 
@@ -187,9 +175,9 @@
         { r: 0, c: 1 }   // Right
       ];
 
-      let validMoves = [];
+      const validMoves = [];
 
-      for (let d of directions) {
+      for (const d of directions) {
         const newRow = row + d.r;
         const newCol = col + d.c;
 
@@ -202,27 +190,60 @@
         }
       }
 
+      return validMoves;
+    }
+
+    function checkWinCondition() {
+      if (getValidMoves().length === 0) {
+        isCornered = true;
+        clearInterval(botTimer);
+        statusEl.textContent = `${currentAIName} // OFFLINE - TASK COMPLETE`;
+
+        // Save best score (lower clicks is better)
+        if (bestScore === 0 || score < bestScore) {
+          bestScore = score;
+          localStorage.setItem('memoryBotBestScore', bestScore);
+        }
+        updateScoreDisplay();
+        return true;
+      }
+      return false;
+    }
+
+    function handleCellClick(index) {
+      if (index === botIndex || blockedCells.has(index) || isCornered) return;
+      
+      blockedCells.add(index);
+      score++;
+      updateScoreDisplay();
+      checkWinCondition();
+      updateDisplay();
+    }
+
+    // Bot movement logic running every 800ms
+    const botTimer = setInterval(() => {
+      if (!isCornered) {
+        moveBot();
+      }
+    }, 800);
+
+    function moveBot() {
+      const validMoves = getValidMoves();
+
       if (validMoves.length > 0) {
         validMoves.sort((a, b) => b.dist - a.dist);
         botIndex = validMoves[0].index;
         statusEl.textContent = `${currentAIName} // RUNNING`;
       } else {
-        isCornered = true;
-        statusEl.textContent = `${currentAIName} // OFFLINE - TASK COMPLETE`;
-        
-        // Save best score if current score is lowered
-        if (score < bestScore) {
-          bestScore = score;
-          localStorage.setItem('memoryBotBestScore', bestScore);
-        }
-        updateScoreDisplay();
+        checkWinCondition();
       }
 
       updateDisplay();
     }
 
     function updateScoreDisplay() {
-      scoreDisplayEl.textContent = `CLICKS: ${score} | BEST: ${bestScore}`;
+      const bestText = bestScore > 0 ? bestScore : '--';
+      scoreDisplayEl.textContent = `CLICKS: ${score} | BEST: ${bestText}`;
     }
 
     function updateDisplay() {
