@@ -95,10 +95,6 @@
     <a-scene cursor="rayOrigin: mouse" raycaster="objects: .clickable">
       <a-sky color="#ECECEC"></a-sky>
 
-      <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener="url: memorychase.html"></a-box>
-      <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener="url: memorychase.html"></a-sphere>
-      <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener="url: memorychase.html"></a-cylinder>
-
       </a-assets> 
 
        <a-gltf-model 
@@ -109,7 +105,23 @@
 
     rotation="0 0 0" 
 
-    scale="0.01 0.01 0.01">
+    scale="0.01 0.01 0.01"
+         
+         class="clickable" click-listener="url: memorychase.html">
+
+  </a-gltf-model>
+
+  <a-gltf-model 
+
+    src="#paticle-accelerator" 
+
+    position="0.122 -1.250 -0.594" 
+
+    rotation="0 0 180" 
+
+    scale="0.01 0.01 0.01"
+         
+         class="clickable" click-listener="url: memorychase.html">
 
   </a-gltf-model>
       
