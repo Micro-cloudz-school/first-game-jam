@@ -81,6 +81,12 @@
     </script>
   </head>
   <body>
+
+    <a-assets>
+       <a-asset-item id="laptop" src="models/26_11_17_22_42_20_150.glb"></a-asset-item>
+       <a-asset-item id="particle-accelerator" src="models/26_11_22_05_06_31_679.glb"></a-asset-item>
+    </a-assets>
+    
     <dialog id="normal-popup" onclose="closeGame()">
       <button id="close-btn" onclick="closeGame()">X</button>
       <iframe id="normal-frame" src="" allow="autoplay; fullscreen"></iframe>
@@ -92,6 +98,20 @@
       <a-box class="clickable" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" click-listener="url: memorychase.html"></a-box>
       <a-sphere class="clickable" position="0 1.25 -5" radius="1.25" color="#EF2D5E" click-listener="url: memorychase.html"></a-sphere>
       <a-cylinder class="clickable" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" click-listener="url: memorychase.html"></a-cylinder>
+
+      </a-assets> 
+
+       <a-gltf-model 
+
+    src="#laptop" 
+
+    position="0 3 0" 
+
+    rotation="0 0 0" 
+
+    scale="0.5 0.5 0.5">
+
+  </a-gltf-model>
       
       <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
       <a-camera position="0 1.6 0" wasd-controls-enabled="false"></a-camera>
